@@ -41,7 +41,7 @@ class MovieTableViewCell: UITableViewCell {
         
         // Clear out the old one before download the image
         self.moviePoster.image = nil
-        self.moviePoster.layer.cornerRadius = 8.0
+        self.moviePoster.layer.cornerRadius = 10.0
         
         getImageDataFrom(url: posterImageURL)
     }
