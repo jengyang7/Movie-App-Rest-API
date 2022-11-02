@@ -8,10 +8,11 @@
 import UIKit
 
 class MovieViewController: UIViewController {
-
+    
     @IBOutlet weak var tableView: UITableView!
     
     private var viewModel = MovieViewModel()
+    let refreshControl = UIRefreshControl()
     
     override func viewDidAppear(_ animated: Bool) {
         navigationController?.navigationBar.barStyle = .black
@@ -20,16 +21,22 @@ class MovieViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        loadPopularMovieData()
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        refreshControl.addTarget(self, action: #selector(self.loadPopularMovieData(_:)), for: .valueChanged)
+        tableView.backgroundView = refreshControl
+        
+        self.loadPopularMovieData(self)
+        refreshControl.beginRefreshing()
     }
     
-    private func loadPopularMovieData() {
+    @objc func loadPopularMovieData(_ sender: AnyObject) {
         viewModel.fetchPopularMoviesData { [weak self] in
             self?.tableView.dataSource = self
-            self?.tableView.reloadData()
+            self?.tableView.reloadData{
+                self?.refreshControl.endRefreshing()
+            }
         }
     }
-
 }
 
 // MARK: - TableView
@@ -48,5 +55,11 @@ extension MovieViewController: UITableViewDataSource {
     }
     
 }
-    
 
+
+extension UITableView {
+    func reloadData(completion:@escaping ()->()) {
+        UIView.animate(withDuration: 0, animations: reloadData)
+            { _ in completion() }
+    }
+}
